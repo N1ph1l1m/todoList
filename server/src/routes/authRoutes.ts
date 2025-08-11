@@ -2,42 +2,45 @@ import express from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
-import db from '../db.ts';
-import { authenticateToken } from '../middleware/addMiddleware.ts';
-
-interface User {
-  id: number;
-  username: string;
-  passwordHash: string;
-}
+import { createUser, findUserByUsername , saveRefreshToken,findRefreshToken } from '../models/authModel.ts';
 
 dotenv.config();
+
+const ACCESS_TOKEN_SECRET  =  process.env.ACCESS_TOKEN_SECRET
+const REFRESH_TOKEN_SECRET  =  process.env.REFRESH_TOKEN_SECRET
+type VerifyErrors = jwt.VerifyErrors;
 const router = express.Router();
 
-function generateAccessToken(user) {
-  return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1m' });
+function generateAccessToken(user:object):string {
+  if (!ACCESS_TOKEN_SECRET) throw new Error("ACCESS_TOKEN_SECRET не задан");
+  return jwt.sign(user, ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
 }
-function generateRefreshToken(user) {
-  return jwt.sign(user, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
+
+
+function generateRefreshToken(user:object):string {
+  if (!REFRESH_TOKEN_SECRET) throw new Error("REFRESH_TOKEN_SECRET не задан");
+  return jwt.sign(user, REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
 }
 
 router.post('/register', async (req, res) => {
-  const { username, password } = req.body;
-  if (!username || !password) return res.status(400).json({ error: 'Введите username и password' });
+  try {
+    const { username, password } = req.body;
+    if (!username || !password)
+      return res.status(400).json({ error: 'Введите username и password' });
 
-  const passwordHash = await bcrypt.hash(password, 10);
-
-  db.run('INSERT INTO users (username, passwordHash) VALUES (?, ?)', [username, passwordHash], function (err) {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json({ id: this.lastID, username });
-  });
+    const passwordHash = await bcrypt.hash(password, 10);
+    const newUser = await createUser(username, passwordHash);
+    res.json({ id: newUser.id, username: newUser.username });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-router.post('/login', (req, res) => {
-  const { username, password } = req.body;
+router.post('/login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    const user = await findUserByUsername(username);
 
-  db.get<User>('SELECT * FROM users WHERE username = ?', [username], async (err, user) => {
-    if (err) return res.status(500).json({ error: err.message });
     if (!user) return res.status(401).json({ error: 'Неверные учетные данные' });
 
     const match = await bcrypt.compare(password, user.passwordHash);
@@ -47,44 +50,33 @@ router.post('/login', (req, res) => {
     const accessToken = generateAccessToken(payload);
     const refreshToken = generateRefreshToken(payload);
 
-    db.run(
-      `INSERT INTO tokens (userId, refreshToken) VALUES (?, ?)
-       ON CONFLICT(userId) DO UPDATE SET refreshToken=excluded.refreshToken`,
-      [user.id, refreshToken],
-      (err) => {
-        if (err) return res.status(500).json({ error: err.message });
-        res.json({ accessToken, refreshToken });
-      }
-    );
-  });
+    await saveRefreshToken(user.id, refreshToken);
+
+    res.json({  id: user.id, accessToken, refreshToken , });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-router.post('/token', (req, res) => {
-  const { token } = req.body; // refreshToken приходит в body
-  if (!token) return res.sendStatus(401);
+router.post('/token', async (req, res) => {
+  try {
+    const { token } = req.body;
+    if (!token) return res.sendStatus(401);
 
-  // Проверяем, есть ли токен в базе
-  db.get('SELECT * FROM tokens WHERE refreshToken = ?', [token], (err, row) => {
-    if (err) return res.status(500).json({ error: err.message });
-    if (!row) return res.sendStatus(403); // нет такого токена в базе
-
-    jwt.verify(token, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
+    const tokenRow = await findRefreshToken(token);
+    if (!tokenRow) return res.sendStatus(403);
+    if (!REFRESH_TOKEN_SECRET) throw new Error("REFRESH_TOKEN_SECRET не задан");
+    jwt.verify(token, REFRESH_TOKEN_SECRET, (err:VerifyErrors | null , user: any) => {
       if (err) return res.sendStatus(403);
-
-      // Генерируем новый access-токен
       const payload = { userId: user.userId, username: user.username };
-      const accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
-
+      const accessToken = generateAccessToken(payload);
       res.json({ accessToken });
     });
-  });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-
-
-router.get('/users', authenticateToken, (req, res) => {
-  res.json({ message: `Привет, ${req.user.username}! Это защищённый маршрут.` });
-});
 
 
 export default router;

@@ -14,7 +14,6 @@ const db = new sqlite.Database(dbPath, (err) => {
   else console.log('Подключение к SQLite установлено');
 });
 
-// Создание таблиц
 db.exec(`
   CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
