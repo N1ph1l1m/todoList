@@ -1,11 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit"
-
+import notificationSlice from "./features/notification/notificationSlice"
 export const store = configureStore({
     reducer:{
         // transactionsSlice:transactionsSlice,
         // modalTransactionSlice:modalTransactionSlice,
         // usersSlice:usersSlice,
-        // notificationSlice:notificationSlice,
+        notificationSlice:notificationSlice,
     }
 })
 
