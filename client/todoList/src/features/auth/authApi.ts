@@ -2,7 +2,7 @@ import axios from "axios";
 
 import { type NavigateFunction } from "react-router";
 import type { AddDispatch } from "../../store";
-import { createError, createSuccess } from "../notification/notificationSlice";
+import { createError, createSuccess, resetNotification } from "../notification/notificationSlice";
 
 const URL  = 'http://localhost:3000'
 
@@ -29,6 +29,7 @@ export  async function login({username,password, navigate,dispatch}:IAuth){
         dispatch(createSuccess("Авторизация прошла успешно"))
         setTimeout(()=>{
             navigate("/todos",{replace:true})
+            dispatch(resetNotification())
         },2000)
         console.log(response);
     }
@@ -52,6 +53,7 @@ export async function registerUser({username,password,navigate,dispatch}:IAuth) 
                dispatch(createSuccess("Регистрация прошла успешно"))
             setTimeout(()=>{
             navigate("/login",{replace:true})
+            dispatch(resetNotification())
         },1000)
          }
     }catch(error){

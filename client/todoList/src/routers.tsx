@@ -6,7 +6,7 @@ import {
 } from "react-router-dom";
 
 import AuthForm from "./components/AuthForm/AuthForm";
-import TodoList from "./components/TodoList/TodoList";
+import TodoForm from "./components/TodoForm/TodoForm";
 
 function Routers() {
   function privateLoader() {
@@ -25,11 +25,11 @@ function Routers() {
       children: [
         {
           index: true,
-          element: <TodoList />,
+          element: <TodoForm />,
         },
         {
           path: "todos",
-          element: <TodoList />,
+          element: <TodoForm />,
         },
       ],
     },

@@ -7,6 +7,7 @@ import Routers from './routers.tsx'
 
 
 
+initTheme();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -15,3 +16,10 @@ createRoot(document.getElementById('root')!).render(
     </Provider>
   </StrictMode>,
 )
+
+function initTheme() {
+  const savedTheme = localStorage.getItem("theme");
+  if (savedTheme) {
+    document.body.dataset.theme = savedTheme;
+  }
+}
