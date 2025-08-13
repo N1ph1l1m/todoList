@@ -3,6 +3,8 @@ import axios from "axios";
 import { type NavigateFunction } from "react-router";
 import type { AddDispatch } from "../../store";
 import { createError, createSuccess, resetNotification } from "../notification/notificationSlice";
+import { setTokens } from "../intercaptor/interceptor";
+
 
 const URL  = 'http://localhost:3000'
 
@@ -24,8 +26,7 @@ export  async function login({username,password, navigate,dispatch}:IAuth){
     if(response && response.status === 200){
         console.log(response.data);
         localStorage.setItem("userId",response.data.id)
-        localStorage.setItem("accessToken", response.data.accessToken)
-        localStorage.setItem("refreshToken", response.data.refreshToken)
+        setTokens(response.data.accessToken,response.data.refreshToken)
         dispatch(createSuccess("Авторизация прошла успешно"))
         setTimeout(()=>{
             navigate("/todos",{replace:true})

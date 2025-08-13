@@ -1,13 +1,21 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import { useNavigate } from "react-router";
-
-
+import TodoList from "../TodoList/TodoList";
+import { useDispatch } from "react-redux";
+import { createTask } from "../../features/todos/todosSlice";
+import { getTodos, } from "../../features/todos/todosApi";
 
 const TodoForm = () => {
 
-         const [newTodo,setNewTodo] = useState("")
-
+    const [newTodo,setNewTodo] = useState("")
+    const [id, setId] = useState(10)
+    const dispatch  = useDispatch()
     const navigate = useNavigate()
+
+  useEffect(()=>{
+     getTodos(dispatch)
+  },[])
+
 
     function toggleTheme() {
     const isDark = document.body.dataset.theme === "dark";
@@ -20,17 +28,28 @@ const TodoForm = () => {
   }
 }
 
+  function handleInput(e:ChangeEvent<HTMLInputElement>){
+      setNewTodo(e.target.value)
+    }
+
+
     function handleAddTodo(e: FormEvent<HTMLFormElement>){
-         e.preventDefault();
+        e.preventDefault()
+         if(newTodo.length !== 0){
+          console.log(id , newTodo);
+          dispatch((createTask({id:id,name:newTodo})))
+          setNewTodo('')
+          setId(prev=>prev+1)
+
+         }
     }
 
     function logOut(){
         localStorage.removeItem("userId")
         localStorage.removeItem("accessToken")
-        localStorage.removeItemtem("refreshToken")
+        localStorage.removeItem("refreshToken")
         navigate('/login')
     }
-
 
     return (
         <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
@@ -67,7 +86,7 @@ const TodoForm = () => {
       type="text"
       placeholder="Введите задачу..."
       value={newTodo}
-      onChange={(e) => setNewTodo(e.target.value)}
+      onChange={handleInput}
       className="flex-grow px-3 py-2 rounded border border-gray-300 dark:border-gray-700
                  bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100
                  focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -81,8 +100,8 @@ const TodoForm = () => {
   </form>
 
 
-    <div className="bg-white dark:bg-gray-800 p-4 rounded shadow">
-
+    <div className="">
+      <TodoList/>
     </div>
 
 

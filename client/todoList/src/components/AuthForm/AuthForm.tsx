@@ -8,8 +8,8 @@ import { createError} from "../../features/notification/notificationSlice";
 import type { RootState } from "../../store";
 
 const AuthForm = () => {
-    const [username,setUsername] = useState('')
-    const [password,setPassword] = useState('')
+    const [username,setUsername] = useState('admin')
+    const [password,setPassword] = useState('admin')
     const [confirmPassword,setConfirmPassword] = useState('')
 
     const navigate = useNavigate()
