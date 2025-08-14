@@ -6,17 +6,28 @@ interface IList{
   completed:boolean,
   userId?:number,
 }
+
+interface ITodoState{
+  list:IList[],
+  isLoading:boolean,
+}
 const todoSlice = createSlice({
   name: "list",
   initialState: {
-    list: [] as IList[],
-  },
+    list: [],
+    isLoading:false
+  }as ITodoState,
+
   reducers: {
+    startLoading(state){
+      state.isLoading = true
+    },
     createTask(state, action) {
       const { id, title } = action.payload;
       state.list.push({ id, title,completed: false,});
     },
    getServerData(state, action) {
+    state.isLoading = false
   if (Array.isArray(action.payload)) {
     state.list = action.payload;
   } else {
@@ -24,7 +35,6 @@ const todoSlice = createSlice({
   }
 },
     toggleTodo(state, action) {
-        console.log(action);
       state.list = state.list.map((list) =>
         list.id === action.payload
           ? { ...list, completed: !list.completed }
@@ -39,6 +49,6 @@ const todoSlice = createSlice({
     }
   },
 });
-export const { createTask, toggleTodo, clearCompleted , deleteTodo,getServerData} = todoSlice.actions;
+export const { createTask, toggleTodo, clearCompleted , deleteTodo,getServerData , startLoading} = todoSlice.actions;
 
 export default todoSlice.reducer;

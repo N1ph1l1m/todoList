@@ -7,7 +7,12 @@ interface IDeleteTodo {
 const DeleteTodo = ({ onClick }: IDeleteTodo) => {
   return (
     <div className="flex gap-2 text-gray-600">
-      <svg
+
+      <button
+        onClick={onClick}
+        className="font-semibold text-xl text-red-700 hover:cursor-pointer"
+      >
+        <svg
         className="w-7 stroke-red-700"
         viewBox="0 0 24 24"
         fill="none"
@@ -21,11 +26,6 @@ const DeleteTodo = ({ onClick }: IDeleteTodo) => {
         <line x1="10" y1="11" x2="10" y2="17"></line>
         <line x1="14" y1="11" x2="14" y2="17"></line>
       </svg>
-      <button
-        onClick={onClick}
-        className="font-semibold text-xl text-red-700 hover:cursor-pointer"
-      >
-        Delete
       </button>
     </div>
   );

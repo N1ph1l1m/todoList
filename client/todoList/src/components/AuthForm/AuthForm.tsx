@@ -1,15 +1,15 @@
 
 import { useLocation} from "react-router";
-import { useState, type ChangeEvent, type FormEvent } from "react";
+import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import { login,registerUser } from "../../features/auth/authApi";
 import { useNavigate } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
-import { createError} from "../../features/notification/notificationSlice";
+import { createError, resetNotification} from "../../features/notification/notificationSlice";
 import type { RootState } from "../../store";
 
 const AuthForm = () => {
-    const [username,setUsername] = useState('admin')
-    const [password,setPassword] = useState('admin')
+    const [username,setUsername] = useState('')
+    const [password,setPassword] = useState('')
     const [confirmPassword,setConfirmPassword] = useState('')
 
     const navigate = useNavigate()
@@ -23,6 +23,10 @@ const AuthForm = () => {
     const titleButton  =  isLogin ? "Войти" : "Регистрация"
     const isLoginLink  = !isLogin ?  "Вход" : "Регистрация"
 
+
+    useEffect(()=>{
+      dispatch(resetNotification())
+    },[])
 
      function handleInput(e:ChangeEvent<HTMLInputElement>,setInput: React.Dispatch<React.SetStateAction<string>>){
         setInput(e.target.value)
@@ -56,10 +60,10 @@ const AuthForm = () => {
         await registerUser({username,password,navigate,dispatch})
         clearForm()
          }
-
     }
 
     function changeForm(){
+        dispatch(resetNotification())
         if(isLogin){
             navigate("/register")
         }else{
@@ -68,13 +72,10 @@ const AuthForm = () => {
     }
 
     return (
-<div  className="  min-h-screen flex justify-center items-center bg-gray-100 dark:bg-gray-900">
-  <div className=" w-90 max-w-md bg-white rounded-xl shadow-lg p-6 flex flex-col gap-4 ">
-    <h1 className=" text-blue-500 dark:text-sky-400 text-3xl text-center">{title}</h1>
-
-    <span
-      className={`text-center ${status === "success" ? "text-green-500" : "text-red-500"}`}
-    >
+<div  className="min-h-screen flex justify-center items-center bg-gray-100 dark:bg-gray-900">
+  <div className="w-90 max-w-md bg-white rounded-xl shadow-lg p-6 flex flex-col gap-4 ">
+    <h1 className="text-blue-500 dark:text-sky-400 text-3xl text-center">{title}</h1>
+    <span className={`text-center ${status === "success" ? "text-green-500" : "text-red-500"}`}>
       {textMessage}
     </span>
 
@@ -87,6 +88,7 @@ const AuthForm = () => {
         placeholder="Имя пользователя"
         required
       />
+
       <input
         className="block w-full border rounded p-2"
         type="password"
@@ -95,6 +97,7 @@ const AuthForm = () => {
         placeholder="Пароль"
         required
       />
+
       {!isLogin && (
         <input
           className="block w-full border rounded p-2"
@@ -107,8 +110,7 @@ const AuthForm = () => {
       )}
       <button
         type="submit"
-        className="bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
-      >
+        className="bg-blue-500 text-white py-2 rounded hover:bg-blue-600">
         {titleButton}
       </button>
     </form>
@@ -117,8 +119,7 @@ const AuthForm = () => {
       <span className="mr-2">У вас есть аккаунт?</span>
       <button
         onClick={() => changeForm()}
-        className="text-blue-500 hover:underline"
-      >
+        className="text-blue-500 hover:underline">
         {isLoginLink}
       </button>
     </div>

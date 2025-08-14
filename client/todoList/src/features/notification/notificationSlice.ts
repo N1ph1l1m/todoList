@@ -26,7 +26,6 @@ const notificationSlice  = createSlice({
             state.textMessage = action.payload
         },
         createError(state,action:PayloadAction<string>){
-            console.log('createError');
             state.status = "error"
             state.textMessage = action.payload
         }

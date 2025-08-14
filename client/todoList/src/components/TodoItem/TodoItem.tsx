@@ -20,7 +20,7 @@ async function deleteTodo() {
     await deleteTodoItem(id,dispatch)
 }
     return (
-        <div key={id} className="container mx-auto px-4 py-3  flex items-center gap-3 bg-white dark:bg-gray-800 rounded shadow ">
+        <div key={id} className="container mx-auto px-4 py-3  flex items-start gap-3 bg-white dark:bg-gray-800 rounded shadow  bg-bottom ">
             <CheckBox checked={completed} onChange={()=>toogle()} />
             <span className=" flex-grow text-lg" >{name}</span>
         <DeleteTodo onClick={()=>deleteTodo()}/>

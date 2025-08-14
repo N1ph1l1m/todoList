@@ -25,7 +25,7 @@ export function authenticateToken(req: Request, res: Response, next: NextFunctio
       return res.sendStatus(403);
     }
 
-    console.log('Токен успешно проверен, payload:', user);
+    console.log('Токен успешно проверен');
     req.user = user;
     next();
   });

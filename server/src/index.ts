@@ -3,8 +3,6 @@ import authRoutes from './routes/authRoutes.ts';
 import todosRouter from "./routes/todosRouter.ts";
 import cors from 'cors'
 
-
-
 const app = express();
 const PORT = 3000
 

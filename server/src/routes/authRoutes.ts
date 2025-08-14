@@ -16,7 +16,6 @@ function generateAccessToken(user:object):string {
   return jwt.sign(user, ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
 }
 
-
 function generateRefreshToken(user:object):string {
   if (!REFRESH_TOKEN_SECRET) throw new Error("REFRESH_TOKEN_SECRET не задан");
   return jwt.sign(user, REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
@@ -76,7 +75,5 @@ router.post('/token', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
-
 
 export default router;

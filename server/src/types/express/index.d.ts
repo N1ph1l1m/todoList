@@ -4,7 +4,6 @@ declare global {
   namespace Express {
     interface Request {
       user?: Pick<Todo, 'id' | 'title' | 'completed' | 'userId' > | undefined;
-
     }
   }
 }

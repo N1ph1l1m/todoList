@@ -1,8 +1,12 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import { useNavigate } from "react-router";
 import TodoList from "../TodoList/TodoList";
-import { useDispatch } from "react-redux";
+import { useDispatch , useSelector} from "react-redux";
+import { type  RootState } from "../../store";
 import { createTodo, getTodos } from "../../features/todos/todosApi";
+import SwitchTheme from "../../shared/switchTheme/switchTheme";
+import { resetNotification } from "../../features/notification/notificationSlice";
+import { startLoading } from "../../features/todos/todosSlice";
 
 const TodoForm = () => {
   const [newTodo, setNewTodo] = useState("");
@@ -11,11 +15,17 @@ const TodoForm = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const {status,textMessage}  = useSelector((state:RootState)=>state.notificationSlice)
+
   useEffect(() => {
+    dispatch(startLoading())
+    dispatch(resetNotification())
     getTodos(dispatch);
   }, []);
 
-  function toggleTheme() {
+
+
+    function toggleTheme() {
     const isDark = document.body.dataset.theme === "dark";
     if (isDark) {
       document.body.removeAttribute("data-theme");
@@ -42,6 +52,7 @@ const TodoForm = () => {
     localStorage.removeItem("userId");
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
+    dispatch(resetNotification())
     navigate("/login");
   }
 
@@ -49,24 +60,36 @@ const TodoForm = () => {
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
       <header className="bg-white dark:bg-gray-800 shadow-md">
         <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-          <nav className="flex gap-4">
-            <button onClick={()=>setActiveTab('all')} className="px-3 py-1 rounded    hover:bg-gray-200 dark:hover:bg-gray-700">
-              Все
-            </button>
-            <button onClick={()=>setActiveTab('active')} className="px-3 py-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700">
-              Активные
-            </button>
-            <button onClick={()=>setActiveTab('completed')} className="px-3 py-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700">
-              Выполненные
-            </button>
-          </nav>
+     <nav className="flex gap-4">
+  <button
+    onClick={() => setActiveTab("all")}
+    className={`px-3 py-1 rounded
+      hover:bg-gray-200 dark:hover:bg-gray-700
+      ${activeTab === "all" ? " bg-blue-500 hover:bg-blue-600 text-white rounded hover:text-black dark:hover:text-white" : ""}`}
+  >
+    Все
+  </button>
+
+  <button
+    onClick={() => setActiveTab("active")}
+    className={`px-3 py-1 rounded
+      hover:bg-gray-200 dark:hover:bg-gray-700
+      ${activeTab === "active" ? "   bg-blue-500 hover:bg-blue-600 text-white rounded hover:text-black dark:hover:text-white " : ""}`}
+  >
+    Активные
+  </button>
+
+  <button
+    onClick={() => setActiveTab("completed")}
+    className={`px-3 py-1 rounded
+      hover:bg-gray-200 dark:hover:bg-gray-700
+      ${activeTab === "completed" ? " bg-blue-500 hover:bg-blue-600 text-white rounded hover:text-black dark:hover:text-white" : ""}`}
+  >
+    Выполненные
+  </button>
+</nav>
           <div className="flex gap-4 items-center">
-            <button
-              className="px-3 py-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
-              onClick={toggleTheme}
-            >
-              Смена темы
-            </button>
+            <SwitchTheme onChange={toggleTheme} />
             <button
               onClick={() => logOut()}
               className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded"
@@ -79,6 +102,7 @@ const TodoForm = () => {
 
       <main className="container mx-auto px-4 py-6">
         <h1 className="text-3xl font-bold mb-4">Список задач</h1>
+            <span className={` ${status === "off" ? "hidden":" block" } ${status === "error" ?  "text-red-600 ":"text-green-600"} block text-center text-xl font-bold mb-4 `} >{textMessage}</span>
         <form onSubmit={handleAddTodo} className="flex gap-2 mb-4">
           <input
             type="text"

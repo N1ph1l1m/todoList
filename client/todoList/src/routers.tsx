@@ -49,8 +49,7 @@ function Routers() {
 
   return (
     <div className="wrapRoute">
-      <RouterProvider router={router}       />
-
+      <RouterProvider router={router} />
     </div>
   );
 }
